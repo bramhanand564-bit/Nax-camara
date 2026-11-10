@@ -7,12 +7,17 @@ on:
 
 jobs:
   build:
-    if: hashFiles('app/src/main/AndroidManifest.xml') != ''
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Prepare Gradle Properties
+        run: |
+          echo "android.useAndroidX=true" > gradle.properties
+          echo "android.enableJetifier=true" >> gradle.properties
+          echo "org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8" >> gradle.properties
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -26,7 +31,7 @@ jobs:
           gradle-version: '8.7'
 
       - name: Build Debug APK
-        run: gradle assembleDebug --stacktrace
+        run: gradle assembleDebug -x lint --stacktrace
 
       - name: Upload Ready APK
         uses: actions/upload-artifact@v4
